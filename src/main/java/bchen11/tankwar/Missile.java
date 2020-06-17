@@ -63,10 +63,17 @@ class Missile {
         if (enemy) { // if the missile hit player tank
             Tank playerTank = GameClient.getInstance().getPlayerTank();
             if (rectangle.intersects(playerTank.getRectangleForHitDetection())) {
-                addExplosion();
-                playerTank.setHp(playerTank.getHp() - 20);
-                if (playerTank.getHp() <= 0) {
-                    playerTank.setLive(false);
+                if(playerTank.isCheatMode()){
+                    if(playerTank.getHp() != 100) {
+                        playerTank.setHp(100);
+                        playerTank.setLive(true);
+                    }
+                }else {
+                    addExplosion();
+                    playerTank.setHp(playerTank.getHp() - 20);
+                    if (playerTank.getHp() <= 0) {
+                        playerTank.setLive(false);
+                    }
                 }
                 this.setLive(false);
             }

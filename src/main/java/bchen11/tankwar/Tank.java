@@ -33,6 +33,11 @@ class Tank {
     private Direction direction;
 
 
+    private boolean cheatMode;
+
+    public boolean isCheatMode() {
+        return cheatMode;
+    }
 
     // getter and setter
     int getHp() {
@@ -51,9 +56,7 @@ class Tank {
         this.live = live;
     }
 
-    boolean isEnemy() {
-        return enemy;
-    }
+
 
 
     // Tank Constructors
@@ -92,6 +95,8 @@ class Tank {
     boolean isDying() {
         return this.hp <= MAX_HP * 0.2;
     }
+
+
 
 
 
@@ -205,12 +210,17 @@ class Tank {
             case KeyEvent.VK_A:
                 superFire();
                 break;
+            case KeyEvent.VK_S:
+                cheatMode = !this.enemy && !cheatMode;
+                break;
             case KeyEvent.VK_F2:
                 GameClient.getInstance().restart();
                 break;
         }
         this.determineDirection();
     }
+
+
 
 
     // Tank fire
@@ -236,7 +246,7 @@ class Tank {
 
 
 
-    private boolean stopped;
+     boolean stopped;
 
     private int code;
 
@@ -288,4 +298,5 @@ class Tank {
         }
         step--;
     }
+
 }

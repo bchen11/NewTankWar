@@ -27,6 +27,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
+
+
 public class GameClient extends JComponent {
 
     static final int WIDTH = 800, HEIGHT = 600; // Window size
@@ -90,7 +92,7 @@ public class GameClient extends JComponent {
         this.blood = new Blood(400, 250);
         this.walls = Arrays.asList(
             new Wall(280, 140, true, 12),
-            new Wall(280, 540, true, 12),
+            new Wall(280, 500, true, 12),
             new Wall(100, 160, false, 12)
 
         );
@@ -105,7 +107,7 @@ public class GameClient extends JComponent {
         this.enemyTanks =  new CopyOnWriteArrayList<>();
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 4; j++) {
-                this.enemyTanks.add(new Tank(200 + j * 120, 400 + 40 * i, true, Direction.UP));
+                this.enemyTanks.add(new Tank(200 + j * 120, 300 + 40 * i, true, Direction.UP));
             }
         }
     }
@@ -123,13 +125,11 @@ public class GameClient extends JComponent {
     protected void paintComponent(Graphics g) {
 
 
-        // background
-        g.setColor(Color.BLACK);
-        g.fillRect(0, 0, WIDTH, HEIGHT);
-
-
-
         if (!playerTank.isLive()) { // if the game is over(player tank is dead)
+            // background
+            g.setColor(Color.BLACK);
+            g.fillRect(0, 0, WIDTH, HEIGHT);
+
             g.setColor(Color.RED);
             g.setFont(new Font(null, Font.BOLD, 100));
             g.drawString("GAME OVER", 100, 200);
@@ -139,9 +139,13 @@ public class GameClient extends JComponent {
 
 
         } else {
+
+            // background
+            g.setColor(Color.BLACK);
+            g.fillRect(0, 0, WIDTH, HEIGHT);
             // game info board
             g.setColor(Color.WHITE);
-            g.setFont(new Font(null, Font.BOLD, 16));
+            g.setFont(new Font("Default", Font.BOLD, 16));
             g.drawString("Missiles: " + missiles.size(), 10, 50);
             g.drawString("Explosions: " + explosions.size(), 10, 70);
             g.drawString("Player Tank HP: " + playerTank.getHp(), 10, 90);
@@ -153,6 +157,16 @@ public class GameClient extends JComponent {
             g.drawImage(Tools.getImage("tree.png"), 10, 520, null);
 
 
+            if (silent) {
+                g.drawString(" SILENT MODE!", 400, 50);
+
+            }
+
+
+            if(playerTank.isCheatMode()){
+                g.setColor(Color.RED);
+                g.drawString("CHEAT MODE ON",200,50);
+            }
 
             playerTank.draw(g);
 
@@ -230,7 +244,14 @@ public class GameClient extends JComponent {
         frame.addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
-                client.playerTank.keyPressed(e);
+                switch(e.getKeyCode()) {
+                    case KeyEvent.VK_M:
+                        client.toggleSilentStatus();
+                        break;
+                    default:
+                    client.playerTank.keyPressed(e);
+                    break;
+                }
             }
 
             @Override
@@ -270,6 +291,7 @@ public class GameClient extends JComponent {
 
 
 
+
     // load the previous game
     private void load() throws IOException {
         File file = new File(GAME_SAVE);
@@ -289,6 +311,8 @@ public class GameClient extends JComponent {
             }
         }
     }
+
+
     // save current game
     void save(String destination) throws IOException {
         Save save = new Save(playerTank.isLive(), playerTank.getPosition(),
@@ -309,4 +333,30 @@ public class GameClient extends JComponent {
         }
         this.initEnemyTanks();
     }
+
+
+
+
+
+
+    private boolean silent;
+
+    boolean isSilent(){
+        return this.silent;
+    }
+
+
+    private void toggleSilentStatus() {
+        silent = !silent;
+        if (silent)
+            System.out.println("enabled silent mode.");
+        else
+            System.out.println("disabled silent mode.");
+    }
+
+    private boolean Pause;
+
+
+
+
 }
