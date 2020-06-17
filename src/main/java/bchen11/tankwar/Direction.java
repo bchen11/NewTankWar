@@ -19,6 +19,8 @@ public enum Direction {
 
     final int code;
 
+
+    // Direction constructor
     Direction(String abbrev, int xFactor, int yFactor, int code) {
         this.abbrev = abbrev;
         this.xFactor = xFactor;
@@ -36,6 +38,7 @@ public enum Direction {
     }
 
     Image getImage(String prefix) {
+
         return Tools.getImage(prefix + abbrev + ".gif");
     }
 

@@ -44,11 +44,13 @@ class Missile {
 
     void draw(Graphics g) {
         move();
+        // prevent missile to penetrate out of window
         if (x < 0 || x > GameClient.WIDTH || y < 0 || y > GameClient.HEIGHT) {
             this.live = false;
             return;
         }
 
+        // prevent missile to penetrate through wall
         Rectangle rectangle = this.getRectangle();
         for (Wall wall : GameClient.getInstance().getWalls()) {
             if (rectangle.intersects(wall.getRectangle())) {
@@ -57,7 +59,8 @@ class Missile {
             }
         }
 
-        if (enemy) {
+
+        if (enemy) { // if the missile hit player tank
             Tank playerTank = GameClient.getInstance().getPlayerTank();
             if (rectangle.intersects(playerTank.getRectangleForHitDetection())) {
                 addExplosion();
@@ -67,7 +70,7 @@ class Missile {
                 }
                 this.setLive(false);
             }
-        } else {
+        } else { // if the missile hit the enemy tank
             for (Tank tank : GameClient.getInstance().getEnemyTanks()) {
                 if (rectangle.intersects(tank.getRectangleForHitDetection())) {
                     addExplosion();
@@ -79,6 +82,8 @@ class Missile {
         }
         g.drawImage(getImage(), x, y, null);
     }
+
+
 
     private void addExplosion() {
         GameClient.getInstance().addExplosion(new Explosion(x, y));

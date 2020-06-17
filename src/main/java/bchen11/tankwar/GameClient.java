@@ -29,16 +29,18 @@ import java.util.stream.Collectors;
 
 public class GameClient extends JComponent {
 
-    static final int WIDTH = 800, HEIGHT = 600;
+    static final int WIDTH = 800, HEIGHT = 600; // Window size
 
     private static final GameClient INSTANCE = new GameClient();
 
     private static final String GAME_SAVE = "game.sav";
 
-    static GameClient getInstance() {
+    static GameClient getInstance() { // return an instance of gameClient
         return INSTANCE;
     }
 
+
+    // all variables of the game
     private Tank playerTank;
 
     private List<Tank> enemyTanks;
@@ -53,6 +55,8 @@ public class GameClient extends JComponent {
 
     private Blood blood;
 
+
+    // getter and adder
     Blood getBlood() {
         return blood;
     }
@@ -77,6 +81,8 @@ public class GameClient extends JComponent {
         return walls;
     }
 
+
+    // GameClient Constructor
     private GameClient() {
         this.playerTank = new Tank(400, 100, Direction.DOWN);
         this.missiles = new CopyOnWriteArrayList<>();
@@ -88,10 +94,13 @@ public class GameClient extends JComponent {
             new Wall(100, 160, false, 12)
 
         );
-        this.initEnemyTanks();
-        this.setPreferredSize(new Dimension(WIDTH, HEIGHT));
+        this.initEnemyTanks(); // Set up Enemy Tanks
+        this.setPreferredSize(new Dimension(WIDTH, HEIGHT)); // Set up the Window size
     }
 
+
+
+    // initialize 12 Enemy Tanks into the game
     private void initEnemyTanks() {
         this.enemyTanks =  new CopyOnWriteArrayList<>();
         for (int i = 0; i < 3; i++) {
@@ -101,19 +110,36 @@ public class GameClient extends JComponent {
         }
     }
 
+
+
+
     private final static Random RANDOM = new Random();
 
+
+
+
+    // paint component of the game
     @Override
     protected void paintComponent(Graphics g) {
+
+
+        // background
         g.setColor(Color.BLACK);
         g.fillRect(0, 0, WIDTH, HEIGHT);
-        if (!playerTank.isLive()) {
+
+
+
+        if (!playerTank.isLive()) { // if the game is over(player tank is dead)
             g.setColor(Color.RED);
             g.setFont(new Font(null, Font.BOLD, 100));
             g.drawString("GAME OVER", 100, 200);
             g.setFont(new Font(null, Font.BOLD, 60));
             g.drawString("PRESS F2 TO RESTART", 60, 360);
+
+
+
         } else {
+            // game info board
             g.setColor(Color.WHITE);
             g.setFont(new Font(null, Font.BOLD, 16));
             g.drawString("Missiles: " + missiles.size(), 10, 50);
@@ -121,26 +147,42 @@ public class GameClient extends JComponent {
             g.drawString("Player Tank HP: " + playerTank.getHp(), 10, 90);
             g.drawString("Enemy Left: " + enemyTanks.size(), 10, 110);
             g.drawString("Enemy Killed: " + enemyKilled.get(), 10, 130);
+
+            // two trees on the corner
             g.drawImage(Tools.getImage("tree.png"), 720, 10, null);
             g.drawImage(Tools.getImage("tree.png"), 10, 520, null);
 
+
+
             playerTank.draw(g);
+
+
+            // blood aid packet
+            // a 1/3 chance to appear on the game if player tank is dying
             if (playerTank.isDying() && RANDOM.nextInt(3) == 2) {
                 blood.setLive(true);
             }
+
             if (blood.isLive()) {
                 blood.draw(g);
             }
 
+
+            // keep record of the current enemy tank number and enemy tank killed
             int count = enemyTanks.size();
             enemyTanks.removeIf(t -> !t.isLive());
             enemyKilled.addAndGet(count - enemyTanks.size());
-            if (enemyTanks.isEmpty()) {
+            if (enemyTanks.isEmpty()) { // re-initialize enemy tank when all 12 were killed
                 this.initEnemyTanks();
             }
+
+
+            // draw enemy tanks, walls, missiles and explosion
             for (Tank tank : enemyTanks) {
                 tank.draw(g);
             }
+
+
             for (Wall wall : walls) {
                 wall.draw(g);
             }
@@ -157,13 +199,18 @@ public class GameClient extends JComponent {
         }
     }
 
+
+
+
+
     public static void main(String[] args) {
-        com.sun.javafx.application.PlatformImpl.startup(()->{});
+        com.sun.javafx.application.PlatformImpl.startup(()->{}); // initialize tool kit for javafx
         JFrame frame = new JFrame();
-        frame.setTitle("史上最无聊的坦克大战！");
+        frame.setTitle(" WELCOME TO TANK WAR ！");
         frame.setIconImage(new ImageIcon("assets/images/icon.png").getImage());
         final GameClient client = GameClient.getInstance();
         frame.add(client);
+        // save current game
         frame.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
@@ -177,7 +224,9 @@ public class GameClient extends JComponent {
                 }
             }
         });
+
         frame.pack();
+        // key listener
         frame.addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
@@ -192,12 +241,17 @@ public class GameClient extends JComponent {
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
 
+
+        // load previous game
         try {
             client.load();
         } catch (IOException e) {
             JOptionPane.showMessageDialog(null, "Failed to load previous game!",
                 "Oops! Error Occurred", JOptionPane.ERROR_MESSAGE);
         }
+
+
+
         //noinspection InfiniteLoopStatement
         while (true) {
             try {
@@ -214,6 +268,9 @@ public class GameClient extends JComponent {
         }
     }
 
+
+
+    // load the previous game
     private void load() throws IOException {
         File file = new File(GAME_SAVE);
         if (file.exists() && file.isFile()) {
@@ -232,7 +289,7 @@ public class GameClient extends JComponent {
             }
         }
     }
-
+    // save current game
     void save(String destination) throws IOException {
         Save save = new Save(playerTank.isLive(), playerTank.getPosition(),
             enemyTanks.stream().filter(Tank::isLive)
@@ -244,6 +301,8 @@ public class GameClient extends JComponent {
         this.save(GAME_SAVE);
     }
 
+
+    // restart the game
     void restart() {
         if (!playerTank.isLive()) {
             playerTank = new Tank(400, 100, Direction.DOWN);

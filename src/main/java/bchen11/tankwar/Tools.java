@@ -9,6 +9,8 @@ import java.io.File;
 
 class Tools {
 
+
+    //Tool methods to get image and play audio
     static Image getImage(String imageName) {
         return new ImageIcon("assets/images/" + imageName).getImage();
     }

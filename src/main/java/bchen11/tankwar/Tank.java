@@ -10,11 +10,12 @@ import java.awt.event.KeyEvent;
 import java.util.Random;
 
 class Tank {
-
+    // get the current position of the player tank
     Position getPosition() {
         return new Position(x, y, direction);
     }
 
+    // variables
     private static final int MOVE_SPEED = 5;
 
     private int x;
@@ -29,6 +30,11 @@ class Tank {
 
     private int hp = MAX_HP;
 
+    private Direction direction;
+
+
+
+    // getter and setter
     int getHp() {
         return hp;
     }
@@ -49,8 +55,8 @@ class Tank {
         return enemy;
     }
 
-    private Direction direction;
 
+    // Tank Constructors
     Tank(int x, int y, Direction direction) {
         this(x, y, false, direction);
     }
@@ -66,25 +72,35 @@ class Tank {
         this.direction = direction;
     }
 
+
+    // move Tank
     private void move() {
-        if (this.stopped) return;
+        if (this.stopped){
+            return;
+        }
         x += direction.xFactor * MOVE_SPEED;
         y += direction.yFactor * MOVE_SPEED;
     }
 
+    // get Image of tank/enemy tank
     Image getImage() {
         String prefix = enemy ? "e" : "";
         return direction.getImage(prefix + "tank");
     }
 
+    // Tank is dying if hp is lower than 20
     boolean isDying() {
         return this.hp <= MAX_HP * 0.2;
     }
+
+
 
     void draw(Graphics g) {
         int oldX = x, oldY = y;
         this.move();
 
+
+        // prevent tank to penetrate out of the window's max size
         if (x < 0) {
             x = 0;
         } else if (x > GameClient.WIDTH - getImage().getWidth(null)) {
@@ -97,6 +113,7 @@ class Tank {
             y = GameClient.HEIGHT - getImage().getHeight(null);
         }
 
+        // prevent tank to penetrate the wall
         Rectangle rec = this.getRectangle();
         for (Wall wall : GameClient.getInstance().getWalls()) {
             if (rec.intersects(wall.getRectangle())) {
@@ -106,6 +123,7 @@ class Tank {
             }
         }
 
+        // prevent player tank to penetrate through enemy tank
         for (Tank tank : GameClient.getInstance().getEnemyTanks()) {
             if (tank != this && rec.intersects(tank.getRectangle())) {
                 x = oldX;
@@ -120,6 +138,7 @@ class Tank {
             y = oldY;
         }
 
+        // sound and effect when player tank eats the blood aid packet
         if (!enemy) {
             Blood blood = GameClient.getInstance().getBlood();
             if (blood.isLive() && rec.intersects(blood.getRectangle())) {
@@ -128,6 +147,8 @@ class Tank {
                 blood.setLive(false);
             }
 
+
+            // draw a Hp bar for the player
             g.setColor(Color.WHITE);
             g.fillRect(x, y - 10, this.getImage().getWidth(null), 10);
 
@@ -135,6 +156,7 @@ class Tank {
             int width = hp * this.getImage().getWidth(null) / MAX_HP;
             g.fillRect(x, y - 10, width, 10);
 
+            // draw player's pet
             Image petImage = Tools.getImage("pet-camel.gif");
             g.drawImage(petImage, this.x - petImage.getWidth(null) - DISTANCE_TO_PET, this.y, null);
         }
@@ -143,6 +165,9 @@ class Tank {
 
     private static final int DISTANCE_TO_PET = 4;
 
+
+
+    // get rectangle of Tank
     Rectangle getRectangle() {
         if (enemy) {
             return new Rectangle(x, y, getImage().getWidth(null), getImage().getHeight(null));
@@ -153,23 +178,42 @@ class Tank {
         }
     }
 
+
     Rectangle getRectangleForHitDetection() {
         return new Rectangle(x, y, getImage().getWidth(null), getImage().getHeight(null));
     }
 
+
+    // respond for each key pressed
     void keyPressed(KeyEvent e) {
         switch (e.getKeyCode()) {
-            case KeyEvent.VK_UP: code |= Direction.UP.code; break;
-            case KeyEvent.VK_DOWN: code |= Direction.DOWN.code; break;
-            case KeyEvent.VK_LEFT: code |= Direction.LEFT.code; break;
-            case KeyEvent.VK_RIGHT: code |= Direction.RIGHT.code; break;
-            case KeyEvent.VK_CONTROL: fire(); break;
-            case KeyEvent.VK_A: superFire(); break;
-            case KeyEvent.VK_F2: GameClient.getInstance().restart(); break;
+            case KeyEvent.VK_UP:
+                code |= Direction.UP.code;
+                break;
+            case KeyEvent.VK_DOWN:
+                code |= Direction.DOWN.code;
+                break;
+            case KeyEvent.VK_LEFT:
+                code |= Direction.LEFT.code;
+                break;
+            case KeyEvent.VK_RIGHT:
+                code |= Direction.RIGHT.code;
+                break;
+            case KeyEvent.VK_CONTROL:
+                fire();
+                break;
+            case KeyEvent.VK_A:
+                superFire();
+                break;
+            case KeyEvent.VK_F2:
+                GameClient.getInstance().restart();
+                break;
         }
         this.determineDirection();
     }
 
+
+    // Tank fire
     private void fire() {
         Missile missile = new Missile(x + getImage().getWidth(null) / 2 - 6,
             y + getImage().getHeight(null) / 2 - 6, enemy, direction);
@@ -178,6 +222,7 @@ class Tank {
         Tools.playAudio("shoot.wav");
     }
 
+    // fire from all 8 direction
     private void superFire() {
         for (Direction direction : Direction.values()) {
             Missile missile = new Missile(x + getImage().getWidth(null) / 2 - 6,
@@ -189,10 +234,14 @@ class Tank {
         Tools.playAudio(audioFile);
     }
 
+
+
     private boolean stopped;
 
     private int code;
 
+
+    // determine direction of tank
     private void determineDirection() {
         Direction newDirection = Direction.get(code);
         if (newDirection == null) {
@@ -205,18 +254,29 @@ class Tank {
 
     void keyReleased(KeyEvent e) {
         switch (e.getKeyCode()) {
-            case KeyEvent.VK_UP: code ^= Direction.UP.code; break;
-            case KeyEvent.VK_DOWN: code ^= Direction.DOWN.code; break;
-            case KeyEvent.VK_LEFT: code ^= Direction.LEFT.code; break;
-            case KeyEvent.VK_RIGHT: code ^= Direction.RIGHT.code; break;
+            case KeyEvent.VK_UP:
+                code ^= Direction.UP.code;
+                break;
+            case KeyEvent.VK_DOWN:
+                code ^= Direction.DOWN.code;
+                break;
+            case KeyEvent.VK_LEFT:
+                code ^= Direction.LEFT.code;
+                break;
+            case KeyEvent.VK_RIGHT:
+                code ^= Direction.RIGHT.code;
+                break;
         }
         this.determineDirection();
     }
+
+
 
     private final Random random = new Random();
 
     private int step = random.nextInt(12) + 3;
 
+    // for enemy tank to move and fire randomly
     void actRandomly() {
         Direction[] dirs = Direction.values();
         if (step == 0) {
